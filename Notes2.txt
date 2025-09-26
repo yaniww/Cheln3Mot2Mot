@@ -1,0 +1,214 @@
+		if(PINA&(1<<END1)&&!tray1)
+		{
+			if(M1_Run)
+			{
+				Mot1_Stop();
+				M1_Run=0;
+			}
+			if(PING&(1<<END9))
+			{
+				tray1_Offset++;
+				if(tray1_Offset>=5&&!tray1)	//задержка для определения наличия лотка на платформе 1
+				{
+					tray1_Offset=0;
+					Dir1=0;			//направление движения лотка 1
+					Mot1_Start(&Dir1);
+					M1_Run=1;
+					Count_Row1=0;
+					tray1=1;		//наличие лотка
+				}
+				//PORTB|=(1<<M1_POW);
+			}
+		}
+
+			
+		if(PINA&(1<<END3))
+		{
+			
+			if(M2_Run)
+			{
+				Mot2_Stop();
+				M2_Run=0;
+			}
+			if(PINC&(1<<END11))
+			{
+				tray2_Offset++;
+				if(tray2_Offset>=5&&!tray2)
+				{
+					tray2_Offset=0;
+					Dir2=0;			//направление движения лотка 2
+					Mot2_Start(&Dir2);
+					M2_Run=1;
+					Count_Row2=0;
+					tray2=1;
+				}
+			}
+		}
+		//проверка конца движения каретки 1
+		if(PINA&(1<<END2))
+		{
+			if(M1_Run)
+			{
+				Mot1_Stop();
+				M1_Run=0;
+			}
+			if(~PINC&(1<<END10))
+			{
+				tray1_Offset++;
+				if(tray1_Offset>=5&&tray1)	//Длительность паузы после убирания лотка
+				{
+					Dir1=1;//обраткое направление движения каретки 1
+					Mot1_Start(&Dir1);
+					M1_Run=1;
+					tray1_Offset=0;
+					tray1=0;				
+				}
+
+
+			}
+			
+
+		}
+
+		//проверка конца движения каретки 2 
+		if(PINA&(1<<END4))
+		{
+			if(M2_Run)
+			{
+				Mot2_Stop();
+				M2_Run=0;
+			}
+			if(~PINC&(1<<END11))
+			{
+				tray2_Offset++;
+				if(tray2_Offset>=5&&tray2)
+				{
+					Dir2=1;		//обратное направление движения каретки 2
+					Mot2_Start(&Dir2);
+					tray2_Offset=0;
+					tray2=0;
+				}
+			}
+
+
+
+		}
+
+		if(M1_Run&&tray1)	
+		{
+			tray1_Offset++;
+			//остановка каретки 1 при достижении фотодатчика
+			if((PINC&(1<<END13))&&M1_Run&&(tray1_Offset>=5)&&!tray1_printing)
+			{
+				
+				Mot1_Stop();
+				M1_Run=0;
+				tray1_Offset=0;
+				tray1_printing=1;
+
+			}
+		
+		}
+	 	else if(!M1_Run && !M3_Run && tray1 && tray1_printing && !tray1_row_printing)	//	
+		{
+			
+			
+			
+							
+				
+
+					//фильтр срабатівания фотодатчика левого лотка
+				
+				//if(!M1_Run)
+				//{	
+					Count_Row1++;
+					if(Count_Row1<7)
+					{
+						
+						if((PINA&(1<<END5))&(PINA&(~(END6))))//-----------------!!!!!!!!!!!!
+						{
+							Dir3=1;				//направления движения каретки ПГ
+							PORTG|=1<<DIR;		//направление печати ПГ
+												// в сторону END6!!! от END5
+													
+						}
+						else if((PINA&(~(1<<END5)))&(PINA&(1<<END6)))
+						{
+							Dir3=0;		//Направление движения каретки ПГ
+							PORTG&=~(1<<DIR);	//Направление печати ПГ
+											// в сторону END5!!! от END6
+
+						}
+						Mot3_Start(&Dir3);
+						M3_Run=1;
+						Count_Egg1=0;
+					}
+					else Count_Row1=0;
+					
+				//}
+
+					/*while(PINA&(~(1<<END5)&1<<END6))
+					{
+						
+					}*/
+
+				/*if(PINA&(~(1<<END5&1<<END6)))	//Проверка отпускания концевиков левого лотка 
+				{
+					EICRA|=(1<<ISC21|1<<ISC20);
+					EIFR|=(1<<INT2);
+					EIMSK|=(1<<	INT2);
+				}*/
+			
+			///else
+			//{
+				//Mot3_Stop();
+				//Count_Egg1=0;
+
+							
+			//}
+			
+			
+
+		}
+		if(tray1_printing && M3_Run && tray1)
+		{
+			if((PINA&~(1<<END5||1<<END6))&&!(EIMSK&(1<<INT2)))
+			{
+				// разрешить прерывание от М3 (INT2) по спадающему фронту
+				EICRA|=1<<ISC21;
+				EIFR|=1<<INTF2;
+				EIMSK|=1<<INT2;
+					
+			}		
+			
+			if(Dir3==1)
+			{
+				//если каретки ПГ достигла конца движения
+				if(PINA&(1<<END6))
+				{
+					Mot3_Stop();
+					EICRA&=~(1<<ISC21);	//отключение прерывания INT2
+					EIFR&=~(1<<INTF2);	//
+					EIMSK&=~(1<<INT2);	//
+				}
+			}
+			if(Dir3==0)
+			{
+				if(PINA&(1<<END5))
+				{
+					Mot3_Stop();
+					EICRA&=~(1<<ISC21);	//отключение прерывания INT2
+					EIFR&=~(1<<INTF2);	//
+					EIMSK&=~(1<<INT2);	//
+
+				}
+			}
+
+
+		}
+
+		
+
+
+
+	

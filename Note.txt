@@ -1,0 +1,45 @@
+#define END1 	PA0 //Начало левого лотка 	PINA0
+#define END2 	PA1	//Конец левого лотка	PINA1
+#define	END3	PA2	//Начало правого лотка	PINA2
+#define END4	PA3	//Конец правого лотка	PINA3
+
+#define	END5	PA4	//Начало каретки левого лотка		PINA4
+#define	END6	PA5	//Конец каретки левого лотка		PINA5
+#define	END7	PA6	//Начало каретки правого лотка		PINA6
+#define	END8	PA7	//Конец каретки правого лотка		PINA7
+#define END9		PG2	//
+#define END10		PC7	//
+#define	END11		PC6	//
+#define	END12		PC5	//
+#define	END13		PC4	//  фотодатчик
+#define	END14		PC3	//
+
+#define	M1_POW		PB2	//
+#define	M2_POW		PB3	//
+#define	M3_POW		PB4	//
+
+#define	M1_BRAKE	PD5	//
+#define	M2_BRAKE	PD6	//
+#define	M3_BRAKE	PD7	//
+
+#define	M1_DIR		PC0//
+#define	M2_DIR		PC1	//
+#define	M3_DIR		PC2	//
+
+#define	M1_PWM		PB5	//
+#define	M2_PWM		PB6	//
+#define	M3_PWM		PB7	//
+
+#define	M1_ENC		PD0	//
+#define	M2_ENC		PD1	//
+#define	M3_ENC		PD2	//
+
+#define	PRN			PG1//
+#define	DIR			PG0//
+
+#define PinEnd1	PINA	// Порт датчиков END 1-8
+#define PinEnd2 PINC	// Порт датчиков END 10-14
+************************
+DIR3==1 --> END5>>END6 *
+Dir3==0 -->	END6>>END5 *
+************************
