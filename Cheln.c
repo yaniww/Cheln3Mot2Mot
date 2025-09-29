@@ -267,7 +267,7 @@ int main(void)
 			sei();
 			
 			Count_Row1++;	//счетчик рядов лотка
-			if( Count_Row1>1 && Count_Row1<7 )	//1-ый и 7-ой ряд пропускаются!!!
+			if( Count_Row1>1 && Count_Row1<7 || PINA & (1<<END2 ))	//1-ый и 7-ой ряд пропускаются!!!
 			{
 				Mot2_Stop();
 				Print_Row();
