@@ -102,7 +102,7 @@ ISR (INT1_vect)
 {
 	
 	countStep++;
-	if(countStep>310)
+	if(countStep>1000/*310*/)
 		countStep=0;
 	
 
@@ -259,28 +259,31 @@ int main(void)
 	Mot2_Start();
 	while(1)
 	{
-		if(PINC&(1<<END13))	//перевірка фотодатчика
+		if(PINC&(1<<END13) )	//перевірка фотодатчика
 		{
 			//обнулення лічильника кроків двигуна стрічки 
-			cli();
-			countStep=0;
-			sei();
+			
 			
 			Count_Row1++;	//счетчик рядов лотка
-			if( Count_Row1>1 && Count_Row1<7 || PINA & (1<<END2 ))	//1-ый и 7-ой ряд пропускаются!!!
+			if( (Count_Row1>1 && Count_Row1<7) || PINA & (1<<END2 ) )	//1-ый и 7-ой ряд пропускаются!!!
 			{
 				Mot2_Stop();
 				Print_Row();
+				
+				cli();
+				countStep=0;
+				sei();
 				
 				Mot2_Start();
 
 			}
 			else if(Count_Row1>6)
 				Count_Row1=0;
-			while(PINC&(1<<END13));
+
+			while(PINC&(1<<END13) || countStep < 1);
 
 		}
-		if(PINA&(1<<END1))
+		if(PINA&(1<<END1)) // Робота в режимі тестування
 		{
 			if(countStep>100)
 			{
@@ -310,7 +313,7 @@ void	Print_Row(void)
 //	unsigned char temp11=0;
 	unsigned char Dir3=0;
 	count_temp=0;
-	Counter=EGGS_START;
+	Counter = EGGS_START;
 	Count_Egg=0;
 
 	if(PINA&(1<<END5)&&(PINA&(~(1<<END6))))
