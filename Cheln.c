@@ -102,8 +102,8 @@ ISR (INT1_vect)
 {
 	
 	countStep++;
-	if(countStep>1000/*310*/)
-		countStep=310;
+	//if(countStep>1000/*310*/)
+	//	countStep=310;
 	
 
 	//	PORTB=0x01;
@@ -296,20 +296,20 @@ int main(void)
 				Mot2_Start();
 
 			}
-			else if(Count_Row1>6)
+			if(Count_Row1>6)
 			{
 				asm("sei");
 				asm("nop");
 				asm("nop");
 				asm("cli");
 				Count_Row1=0;
-				countStep=0;
+				countStep=11;
 			}
 
 			//temp1++;
 			//sei();
 			
-			while( countStep < 10 || PINC&(1<<END13))
+			while( countStep < 5 || PINC&(1<<END13))
 			{
 				asm("sei");
 				asm("nop");
@@ -320,7 +320,7 @@ int main(void)
 
 		}
 		cli();
-		if(countStep>300)
+		if(countStep>1000)
 		{
 			Count_Row1=0;
 			countStep=11;
