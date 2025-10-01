@@ -76,7 +76,7 @@ unsigned int Counter=EGGS_START;	//счетчик импульсов между яйцами в ряду
 unsigned char volatile Count_Egg=0;
 unsigned int volatile count_temp=0;
 unsigned char volatile stoping_flag=0;
-unsigned int countStep=0;
+unsigned int volatile countStep=0;
 unsigned char temp11=0;
 
 void 	Mot2_Start(void);						//unsigned char 	*DirM2
@@ -103,7 +103,7 @@ ISR (INT1_vect)
 	
 	countStep++;
 	if(countStep>1000/*310*/)
-		countStep=0;
+		countStep=310;
 	
 
 	//	PORTB=0x01;
@@ -236,12 +236,13 @@ ISR	(TIMER1_COMPC_vect)
 int main(void)
 {
 	//DDRC=((1<<M1_DIR)|(1<<M2_DIR)|(1<<M3_DIR));
+	//uint8_t temp1=0;
 	//PORTC=0xFF;
 	//int i=0;
 	//int* countPulse=&i;
 	//unsigned char 		Dir3=0;	//Dir1=0,	Dir2=0,
 	//unsigned char	Count_Egg1=0;//,	Count_Egg2=0;
-	unsigned char	Count_Row1=0;//,	Count_Row2=0;
+	unsigned char volatile	Count_Row1=0;//,	Count_Row2=0;
 	//unsigned char		M2_Run=0,	M3_Run=0;//	M1_Run=0,		флаги роботы двигателей
 	//unsigned char	*m2dir=0;
 	//unsigned char 	tray1=0, tray2=0;//флаги наличия лотков
@@ -259,14 +260,32 @@ int main(void)
 	Mot2_Start();
 	while(1)
 	{
-		if(PINC&(1<<END13) )	//перевірка фотодатчика
+		cli(); //*****************************************************
+		if(PINA&(1<<END1)) // Робота в режимі тестування
+		{
+			
+				
+			if(countStep>100)
+			{
+				sei();
+				Mot2_Stop();
+				cli();
+				countStep=0;
+				sei();
+				Print_Row();
+				Mot2_Start();	
+			}
+		}
+		else if(PINC&(1<<END13) && countStep > 5 )	//перевірка фотодатчика
 		{
 			//обнулення лічильника кроків двигуна стрічки 
 			
 			
 			Count_Row1++;	//счетчик рядов лотка
+			cli();
 			if( (Count_Row1>1 && Count_Row1<7) || PINA & (1<<END2 ) )	//1-ый и 7-ой ряд пропускаются!!!
 			{
+				sei();
 				Mot2_Stop();
 				Print_Row();
 				
@@ -278,30 +297,40 @@ int main(void)
 
 			}
 			else if(Count_Row1>6)
-				Count_Row1=0;
-
-			while(PINC&(1<<END13) || countStep < 1);
-
-		}
-		if(PINA&(1<<END1)) // Робота в режимі тестування
-		{
-			if(countStep>100)
 			{
-				Mot2_Stop();
-				cli();
+				asm("sei");
+				asm("nop");
+				asm("nop");
+				asm("cli");
+				Count_Row1=0;
 				countStep=0;
-				sei();
-				Print_Row();
-				Mot2_Start();	
 			}
+
+			//temp1++;
+			//sei();
+			
+			while( countStep < 10 || PINC&(1<<END13))
+			{
+				asm("sei");
+				asm("nop");
+				asm("nop");
+				asm("cli");
+			}
+			sei();
+
 		}
+		cli();
 		if(countStep>300)
 		{
 			Count_Row1=0;
+			countStep=11;
 		}
 
-
-
+		sei();
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		asm("nop");
 
 	}//while(1)-----------------------------------------------
 	
@@ -399,7 +428,7 @@ void	Print_Row(void)
 	
 	
 	Mot3_Stop();
-	EIMSK=0;
+	//EIMSK=0;
 }
 
 
@@ -468,7 +497,7 @@ void	Mot2_Start(void)	//unsigned char *Dir_M2
 	TIFR|=1<<OCF1B;
 	TIMSK|=1<<OCIE1B;
 	cli();
-	EICRA=(1<<ISC11);
+	EICRA = 1<<ISC11 | 1<<ISC10;
 	EIMSK=(1<<INT1);
 	EIFR=(1<<INTF1);
 	sei();	
