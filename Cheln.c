@@ -294,9 +294,10 @@ int main(void)
 				sei();
 				
 				Mot2_Start();
+				cli();
 
 			}
-			if(Count_Row1>6)
+			if(Count_Row1>=6)
 			{
 				asm("sei");
 				asm("nop");
@@ -309,7 +310,7 @@ int main(void)
 			//temp1++;
 			//sei();
 			
-			while( countStep < 5 || PINC&(1<<END13))
+			while( /*countStep < 5 || */PINC&(1<<END13))
 			{
 				asm("sei");
 				asm("nop");
